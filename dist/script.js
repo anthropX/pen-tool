@@ -6,6 +6,9 @@ const app = Vue.createApp({
       ctx: null,
       isErasing: false,
       justStarted: true,
+      hue: (Math.random()*360),
+      previousX: -1,
+      previousY: -1,
     }
   },
   computed: {
@@ -34,6 +37,8 @@ const app = Vue.createApp({
         if (event.keyCode === 16 || event.keyCode === 17) {
           self.ctx.closePath();
           self.ctx.beginPath();
+          self.previousX = -1;
+          self.previousY = -1;
         }
       });
       document.addEventListener('mousemove', function(event) {  
@@ -43,10 +48,20 @@ const app = Vue.createApp({
           self.ctx.lineTo(event.clientX, event.clientY);
           self.ctx.stroke();
         } else if (event.shiftKey === true) {
-          self.ctx.strokeStyle = 'hsl(0, 0%, 100%)';
-          self.ctx.lineWidth = 5;
+          self.ctx.strokeStyle = `hsl(${self.hue}, 100%, 50%)`;
+          self.ctx.lineWidth = 50;
+          self.hue = self.hue + 0.5;
+          var startFresh = false;
+          if (self.previousX === -1) {
+            startFresh = true;
+          }
+          self.ctx.moveTo(startFresh ? event.clientX : self.previousX , startFresh ? event.clientY : self.previousY);
           self.ctx.lineTo(event.clientX, event.clientY);
           self.ctx.stroke();
+          self.ctx.closePath();
+          self.ctx.beginPath();
+          self.previousX = event.clientX;
+          self.previousY = event.clientY;
         }
       });
     },
